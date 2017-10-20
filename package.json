@@ -1,61 +1,6 @@
 {
-  "_args": [
-    [
-      {
-        "raw": "carwings@git+https://github.com/blandman/carwings.git",
-        "scope": null,
-        "escapedName": "carwings",
-        "name": "carwings",
-        "rawSpec": "git+https://github.com/blandman/carwings.git",
-        "spec": "git+https://github.com/blandman/carwings.git",
-        "type": "hosted",
-        "hosted": {
-          "type": "github",
-          "ssh": "git@github.com:blandman/carwings.git",
-          "sshUrl": "git+ssh://git@github.com/blandman/carwings.git",
-          "httpsUrl": "git+https://github.com/blandman/carwings.git",
-          "gitUrl": "git://github.com/blandman/carwings.git",
-          "shortcut": "github:blandman/carwings",
-          "directUrl": "https://raw.githubusercontent.com/blandman/carwings/master/package.json"
-        }
-      },
-      "/Users/daddy/HomeKit-Carwings"
-    ]
-  ],
-  "_from": "git+https://github.com/blandman/carwings.git",
-  "_id": "carwings@0.1.0",
-  "_inCache": true,
-  "_location": "/carwings",
-  "_phantomChildren": {},
-  "_requested": {
-    "raw": "carwings@git+https://github.com/blandman/carwings.git",
-    "scope": null,
-    "escapedName": "carwings",
-    "name": "carwings",
-    "rawSpec": "git+https://github.com/blandman/carwings.git",
-    "spec": "git+https://github.com/blandman/carwings.git",
-    "type": "hosted",
-    "hosted": {
-      "type": "github",
-      "ssh": "git@github.com:blandman/carwings.git",
-      "sshUrl": "git+ssh://git@github.com/blandman/carwings.git",
-      "httpsUrl": "git+https://github.com/blandman/carwings.git",
-      "gitUrl": "git://github.com/blandman/carwings.git",
-      "shortcut": "github:blandman/carwings",
-      "directUrl": "https://raw.githubusercontent.com/blandman/carwings/master/package.json"
-    }
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "git+https://github.com/blandman/carwings.git#b769dcfc64c6c3800ae888af4a70f183d8283e5a",
-  "_shasum": "b43d44340cf38ade8182c5ff2e51f80c31b5f2a1",
-  "_shrinkwrap": null,
-  "_spec": "carwings@git+https://github.com/blandman/carwings.git",
-  "_where": "/Users/daddy/HomeKit-Carwings",
   "author": {
-    "name": "Joshua Perry",
-    "email": "josh@pdk.io"
+    "name": "Bhagya Silva"
   },
   "babel": {
     "presets": [
@@ -87,16 +32,17 @@
   },
   "description": "A javascript library for interacting with the Nissan Leaf Carwings API.",
   "devDependencies": {
+    "@types/jasmine": "^2.6.0",
     "@types/node": "^8.0.46",
     "awesome-typescript-loader": "^3.2.3",
     "babel-cli": "^6.18.0",
     "babel-plugin-transform-object-rest-spread": "^6.20.2",
     "babel-preset-env": "^1.0.2",
+    "jasmine-ts": "^0.2.1",
     "source-map-loader": "^0.2.2",
     "typescript": "^2.5.3"
   },
-  "gitHead": "b769dcfc64c6c3800ae888af4a70f183d8283e5a",
-  "homepage": "https://github.com/joshperry/carwings#readme",
+  "homepage": "https://github.com/bhagyas/carwings-typescript#readme",
   "keywords": [
     "carwings",
     "nissan",
@@ -110,12 +56,12 @@
   "readmeFilename": "readme.markdown",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joshperry/carwings.git"
+    "url": "git+https://github.com/bhagyas/carwings-typescript.git"
   },
   "scripts": {
     "bstart": "babel-node src/index.ts",
     "build": "webpack --colors --progress --bail",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine-ts \"./test/**/*.spec.ts\""
   },
   "version": "0.1.0"
 }

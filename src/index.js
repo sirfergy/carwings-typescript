@@ -154,7 +154,7 @@ exports.loginSession = acompose(function (s) { return function (action) { return
         case 0: return [4 /*yield*/, api(action, __assign({}, s))];
         case 1: return [2 /*return*/, _a.sent()];
     }
-}); }); }; }, function (p) { return ({ custom_sessionid: getsessionid(p), VIN: getvin(p), RegionCode: getregioncode(p) }); }, authenticate);
+}); }); }; }, function (profile) { return ({ custom_sessionid: getsessionid(profile), VIN: getvin(profile), RegionCode: getregioncode(profile) }); }, authenticate);
 var pollresult = fp_1.default.curry(function (session, action, resultKey) { return __awaiter(_this, void 0, void 0, function () {
     var result;
     return __generator(this, function (_a) {

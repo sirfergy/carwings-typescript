@@ -1,5 +1,7 @@
 # Carwings Javascript/Typescript API Library and Tools
 
+This is based on the original Carwings library written with pure javascript.
+
 This code is meant for interacting with the Nissan Leaf Carwings API. This API allows one to query a swath of information about the vehicle, some of it cached in the cloud and some pulled directly from the vehicle over its cellular connectivity. The API also allows modifying a limited set of vehicle states (AC on/off, charge start/stop).
 
 It is written for [node.js](https://nodejs.org) and uses the [babel transpiler](https://babeljs.io) mainly for taking advantage of es6 modules and es8(?) async/await to make network ops more pleasant to work with.
