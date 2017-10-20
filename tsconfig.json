@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "outDir": "./dist",
+        "allowJs": true,
+        "lib": [ "es2015" ]
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+}
