@@ -66,12 +66,28 @@ const blowPassword = _.curry((key:string, plainpass:string): string => {
  * @param profile
  * @returns {string}
  */
-function getsessionid(profile): string {
+function getsessionid(profile) {
+  if (profile && profile.vehicleInfo[0]) {
+    return profile.vehicleInfo[0].custom_sessionid;
+  }
+  else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
   return profile.VehicleInfoList.vehicleInfo[0].custom_sessionid;
+
+  } else {
+    return null;
+  }
 }
 
-function getvin(profile): string {
+function getvin(profile) {
+  if (profile && profile.vehicleInfo[0]) {
+    return profile.vehicleInfo[0].vin;
+  }
+  else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
   return profile.VehicleInfoList.vehicleInfo[0].vin;
+
+  } else {
+    return null;
+  }
 }
 
 function getregioncode(profile): string {
