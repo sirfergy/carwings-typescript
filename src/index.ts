@@ -39,8 +39,16 @@ export async function api(action:string, data: any) {
     console.log(`🍃 api ${action} 👍`);
     return response.data;
   } else {
+
+    if(response.data.status === 401) {
+      // Send back 401 response so it can be handled.
+      console.log('Carwings Status 401');
+      return response.data;
+    } else {
     console.log(`api ${action} 👎\r\n`, response);
     throw new Error(response.data.ErrorMessage);
+  }
+
   }
 }
 
