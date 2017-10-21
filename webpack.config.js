@@ -2,11 +2,13 @@ module.exports = {
     entry: "./src/index.ts",
     output: {
         filename: "index.js",
-        path: __dirname + "/lib"
+        path: __dirname + "/dist",
+        libraryTarget: "commonjs2"
     },
 
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
+    target : 'node',
 
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
@@ -14,12 +16,9 @@ module.exports = {
     },
 
     module: {
-        rules: [
-            // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
-
-            // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
-        ]
-    }
+      loaders: [
+        { test: /.ts$/, loader: 'awesome-typescript-loader' }
+      ]
+    },
+    watch: true
 };

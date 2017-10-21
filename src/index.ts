@@ -1,5 +1,5 @@
 import { createCipheriv } from 'crypto';
-import _ from 'lodash/fp';
+import * as _ from "lodash/fp";
 import axios from 'axios';
 import * as querystring from 'query-string';
 
@@ -9,7 +9,6 @@ axios.defaults.baseURL = 'https://gdcportalgw.its-mo.com';
 process.on('unhandledRejection', r => console.log(r));
 export interface ICarwingsSession extends Function{
 }
-
 const initial_app_strings:string = 'geORNtsZe5I4lRGjG9GZiA';
 const defaultRegionCode:string = 'NNA';
 const language:string = 'en-US';

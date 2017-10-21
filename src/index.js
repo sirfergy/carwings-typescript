@@ -45,7 +45,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var crypto_1 = require("crypto");
-var fp_1 = require("lodash/fp");
+var _ = require("lodash/fp");
 var axios_1 = require("axios");
 var querystring = require("query-string");
 axios_1.default.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -55,11 +55,22 @@ var initial_app_strings = 'geORNtsZe5I4lRGjG9GZiA';
 var defaultRegionCode = 'NNA';
 var language = 'en-US';
 var tz = 'America/Denver';
-var tlog = function (t) { return fp_1.default.thru(function (d) { console.log(t, d); return d; }); };
+var tlog = function (t) { return _.thru(function (d) { console.log(t, d); return d; }); };
+/**
+ * Sleeps.
+ * @param {number} ms
+ * @returns {Promise<any>}
+ */
 function sleep(ms) {
     if (ms === void 0) { ms = 0; }
     return new Promise(function (r) { return setTimeout(r, ms); });
 }
+/**
+ * Makes a request to the API endpoint
+ * @param {string} action
+ * @param data
+ * @returns {Promise<void>}
+ */
 function api(action, data) {
     return __awaiter(this, void 0, void 0, function () {
         var response;
@@ -73,8 +84,15 @@ function api(action, data) {
                         return [2 /*return*/, response.data];
                     }
                     else {
-                        console.log("api " + action + " \uD83D\uDC4E\r\n", response);
-                        throw new Error(response.data.ErrorMessage);
+                        if (response.data.status === 401) {
+                            // Send back 401 response so it can be handled.
+                            console.log('Carwings Status 401');
+                            return [2 /*return*/, response.data];
+                        }
+                        else {
+                            console.log("api " + action + " \uD83D\uDC4E\r\n", response);
+                            throw new Error(response.data.ErrorMessage);
+                        }
                     }
                     return [2 /*return*/];
             }
@@ -82,17 +100,38 @@ function api(action, data) {
     });
 }
 exports.api = api;
-var blowpassword = fp_1.default.curry(function (key, plainpass) {
+var blowPassword = _.curry(function (key, plainpass) {
     var cipher = crypto_1.createCipheriv('bf-ecb', key, '');
     var encpass = cipher.update(plainpass, 'utf8', 'base64');
     encpass += cipher.final('base64');
     return encpass;
 });
+/**
+ * Returns a session id from a given vehicle info list item.
+ * @param profile
+ * @returns {string}
+ */
 function getsessionid(profile) {
-    return profile.VehicleInfoList.vehicleInfo[0].custom_sessionid;
+    if (profile && profile.vehicleInfo[0]) {
+        return profile.vehicleInfo[0].custom_sessionid;
+    }
+    else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
+        return profile.VehicleInfoList.vehicleInfo[0].custom_sessionid;
+    }
+    else {
+        return null;
+    }
 }
 function getvin(profile) {
-    return profile.VehicleInfoList.vehicleInfo[0].vin;
+    if (profile && profile.vehicleInfo[0]) {
+        return profile.vehicleInfo[0].vin;
+    }
+    else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
+        return profile.VehicleInfoList.vehicleInfo[0].vin;
+    }
+    else {
+        return null;
+    }
 }
 function getregioncode(profile) {
     return profile.CustomerInfo.RegionCode;
@@ -102,8 +141,8 @@ var acompose = function (fn) {
     for (var _i = 1; _i < arguments.length; _i++) {
         rest[_i - 1] = arguments[_i];
     }
-    return rest.length
-        ? function () {
+    if (rest.length) {
+        return function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i] = arguments[_i];
@@ -116,29 +155,32 @@ var acompose = function (fn) {
                     case 1: return [2 /*return*/, _a.apply(void 0, [_b.sent()])];
                 }
             }); });
-        }
-        : fn;
+        };
+    }
+    else {
+        return fn;
+    }
 };
-var challenge = acompose(function (r) { return r.baseprm; }, function () { return api('InitialApp', { initial_app_strings: initial_app_strings }); });
+var performChallenge = acompose(function (responseResult) { return responseResult.baseprm; }, function () { return api('InitialApp', { initial_app_strings: initial_app_strings }); });
 // rawCredentials => apiCredentials
-var genCredentials = function (UserId, password, RegionCode) {
+var generateCredentials = function (UserId, password, RegionCode) {
     if (RegionCode === void 0) { RegionCode = defaultRegionCode; }
     return __awaiter(_this, void 0, void 0, function () {
         var _a, _b, _c, _d;
         return __generator(this, function (_e) {
             switch (_e.label) {
                 case 0:
-                    _b = (_a = fp_1.default).compose;
+                    _b = (_a = _).compose;
                     _c = [function (Password) { return ({ UserId: UserId, Password: Password, RegionCode: RegionCode }); }];
-                    _d = blowpassword;
-                    return [4 /*yield*/, challenge()];
+                    _d = blowPassword;
+                    return [4 /*yield*/, performChallenge()];
                 case 1: return [2 /*return*/, _b.apply(_a, _c.concat([_d.apply(void 0, [_e.sent()])]))(password)];
             }
         });
     });
 };
 // apiCredentials => profile
-var userLogin = function (credentials) { return __awaiter(_this, void 0, void 0, function () {
+var performUserLogin = function (credentials) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, api('UserLoginRequest', __assign({ initial_app_strings: initial_app_strings }, credentials))];
@@ -147,20 +189,31 @@ var userLogin = function (credentials) { return __awaiter(_this, void 0, void 0,
     });
 }); };
 // rawCredentials => profile
-var authenticate = acompose(userLogin, genCredentials);
+var performAuthentication = acompose(performUserLogin, generateCredentials);
 // rawCredentials => (apioperation => apiresults)
-exports.loginSession = acompose(function (s) { return function (action) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+/**
+ * Logs in and creates a session.
+ * @type {Function}
+ */
+exports.loginSession = acompose(function (sessionRequest) { return function (action) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
     switch (_a.label) {
-        case 0: return [4 /*yield*/, api(action, __assign({}, s))];
+        case 0: return [4 /*yield*/, api(action, __assign({}, sessionRequest))];
         case 1: return [2 /*return*/, _a.sent()];
     }
-}); }); }; }, function (profile) { return ({ custom_sessionid: getsessionid(profile), VIN: getvin(profile), RegionCode: getregioncode(profile) }); }, authenticate);
-var pollresult = fp_1.default.curry(function (session, action, resultKey) { return __awaiter(_this, void 0, void 0, function () {
+}); }); }; }, function (resultResponse) { return ({ custom_sessionid: getsessionid(resultResponse), VIN: getvin(resultResponse), RegionCode: getregioncode(resultResponse) }); }, //transforms auth response.
+performAuthentication);
+/**
+ * Returns a result after waiting for 5000ms and a callback.
+ */
+var polledResult = _.curry(function (session, action, resultKey) { return __awaiter(_this, void 0, void 0, function () {
     var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, sleep(5000)];
+            case 0: 
+            //sleep and make a request.
+            return [4 /*yield*/, sleep(5000)];
             case 1:
+                //sleep and make a request.
                 _a.sent();
                 return [4 /*yield*/, session(action, { resultKey: resultKey })];
             case 2:
@@ -173,12 +226,17 @@ var pollresult = fp_1.default.curry(function (session, action, resultKey) { retu
         }
     });
 }); });
-var longpollrequest = fp_1.default.curry(function (action, pollaction, session) {
-    return acompose(pollresult(session, pollaction), function (r) { return r.resultKey; }, function () { return session(action); })();
+/**
+ * Makes a request for the action, and then keeps polling for the polledAction to complete.
+ */
+var longPolledRequest = _.curry(function (action, polledAction, session) {
+    return acompose(polledResult(session, polledAction), function (actionResponseResult) { return actionResponseResult.resultKey; }, function () { return session(action); })();
 });
 exports.batteryRecords = function (session) { return session('BatteryStatusRecordsRequest'); };
 exports.batteryStatusCheckRequest = function (session) { return session('BatteryStatusCheckRequest'); };
-exports.batteryStatusCheck = function (session) { return longpollrequest('BatteryStatusCheckResultRequest', 'BatteryStatusCheckResultRequest', session); };
-exports.hvacOn = function (session) { return longpollrequest('ACRemoteRequest', 'ACRemoteResult', session); };
-exports.hvacOff = function (session) { return longpollrequest('ACRemoteOffRequest', 'ACRemoteOffResult', session); };
+exports.batteryStatusCheck = function (session) { return longPolledRequest('BatteryStatusCheckRequest', 'BatteryStatusCheckResultRequest', session); };
+exports.hvacOn = function (session) { return session('ACRemoteRequest'); };
+exports.hvacOff = function (session) { return session('ACRemoteOffRequest'); };
 exports.hvacStatus = function (session) { return session('RemoteACRecordsRequest'); };
+//experimental, for homebridge-carwings.
+exports.authenticateAndBatteryStatusCheckRequest = function (session) { return longPolledRequest('UserLoginRequest', 'BatteryStatusCheckRequest', session); };

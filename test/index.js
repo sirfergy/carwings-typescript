@@ -1,13 +1,13 @@
-// Create the api session
-// done already.
-import {loginSession, batteryRecords, hvacOff, hvacOn} from "../src/index";
-
-(async function() {
-let session = await loginSession('bobbytables@gmail.com', 'Tr0ub4dor&3');
-
-let data = await batteryRecords(session);
-let data = await hvacOn(session);
-let carsession = data => session({ ...data, profile.VehicleInfoList.vehicleInfo[0].vin });
+//Create the api session
+//done already.
+// import {loginSession, batteryRecords, hvacOff, hvacOn} from "../src/index";
+//
+// (async function() {
+// let session = await loginSession('bobbytables@gmail.com', 'Tr0ub4dor&3');
+//
+// let data = await batteryRecords(session);
+// let data = await hvacOn(session);
+// let carsession = data => session({ ...data, profile.VehicleInfoList.vehicleInfo[0].vin });
 /*
 data = await api('InitialApp', {
   initial_app_strings
@@ -101,6 +101,6 @@ do {
   });
 } while(data.responseFlag !== '1')
 */
-
-console.log(data);
-}());
+//
+// console.log(data);
+// }());

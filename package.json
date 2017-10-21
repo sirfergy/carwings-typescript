@@ -2,26 +2,6 @@
   "author": {
     "name": "Bhagya Silva"
   },
-  "babel": {
-    "presets": [
-      [
-        "env",
-        {
-          "targets": {
-            "node": 6.9
-          }
-        }
-      ]
-    ],
-    "plugins": [
-      [
-        "transform-object-rest-spread",
-        {
-          "useBuiltIns": true
-        }
-      ]
-    ]
-  },
   "dependencies": {
     "@types/lodash": "^4.14.78",
     "@types/node": "^8.0.46",
@@ -36,11 +16,16 @@
     "@types/node": "^8.0.46",
     "awesome-typescript-loader": "^3.2.3",
     "babel-cli": "^6.18.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-lodash": "^3.2.11",
     "babel-plugin-transform-object-rest-spread": "^6.20.2",
-    "babel-preset-env": "^1.0.2",
+    "babel-preset-env": "^1.6.1",
     "jasmine-ts": "^0.2.1",
+    "lodash-webpack-plugin": "^0.11.4",
     "source-map-loader": "^0.2.2",
-    "typescript": "^2.5.3"
+    "typescript": "^2.5.3",
+    "webpack": "^3.8.1"
   },
   "homepage": "https://github.com/bhagyas/carwings-typescript#readme",
   "keywords": [
@@ -49,7 +34,7 @@
     "leaf"
   ],
   "license": "MIT",
-  "main": "lib/index.js",
+  "main": "./dist/index.js",
   "name": "carwings-typescript",
   "optionalDependencies": {},
   "readme": "# Carwings Javascript API Library and Tools\n\nThis code is meant for interacting with the Nissan Leaf Carwings API. This API allows one to query a swath of information about the vehicle, some of it cached in the cloud and some pulled directly from the vehicle over its cellular connectivity. The API also allows modifying a limited set of vehicle states (AC on/off, charge start/stop).\n\nIt is written for [node.js](https://nodejs.org) and uses the [babel transpiler](https://babeljs.io) mainly for taking advantage of es6 modules and es8(?) async/await to make network ops more pleasant to work with.\n\n## Getting Started\n\nThe code in `src` is the non-transpiled source, and in `lib` can be found the transpiled library that is ready to be `require()`'d directly from node >= ^6.9 (may work on older, but this is untested).\n\nAfter cloning the code (and installing node.js) simply run `npm install` to install required dependencies.\n\n## Development\n\nThere are currently a couple simple helper scripts defined in `package.json`:\n\n- `npm run build` will transpile from `src` to `lib`\n- `npm run bstart` will run the code from `src` directly using [babel-node](https://babeljs.io/docs/usage/cli/#babel-node) for a simplified dev cycle.\n\n## License\n\nMIT, yo.\n",
