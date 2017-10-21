@@ -45,9 +45,9 @@ export async function api(action:string, data: any) {
       console.log('Carwings Status 401');
       return response.data;
     } else {
-    console.log(`api ${action} 👎\r\n`, response);
-    throw new Error(response.data.ErrorMessage);
-  }
+      console.log(`api ${action} 👎\r\n`, response);
+      throw new Error(response.data.ErrorMessage);
+    }
 
   }
 }
@@ -71,7 +71,7 @@ function getsessionid(profile) {
     return profile.vehicleInfo[0].custom_sessionid;
   }
   else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
-  return profile.VehicleInfoList.vehicleInfo[0].custom_sessionid;
+    return profile.VehicleInfoList.vehicleInfo[0].custom_sessionid;
 
   } else {
     return null;
@@ -83,7 +83,7 @@ function getvin(profile) {
     return profile.vehicleInfo[0].vin;
   }
   else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
-  return profile.VehicleInfoList.vehicleInfo[0].vin;
+    return profile.VehicleInfoList.vehicleInfo[0].vin;
 
   } else {
     return null;
@@ -164,10 +164,10 @@ const longPolledRequest = _.curry((action:string, polledAction:string, session:I
 
 export const batteryRecords = (session: ICarwingsSession) => session('BatteryStatusRecordsRequest');
 export const batteryStatusCheckRequest = (session: ICarwingsSession) => session('BatteryStatusCheckRequest');
-export const batteryStatusCheck = (session: ICarwingsSession) => longPolledRequest('BatteryStatusCheckResultRequest', 'BatteryStatusCheckResultRequest', session);
+export const batteryStatusCheck = (session: ICarwingsSession) => longPolledRequest('BatteryStatusCheckRequest', 'BatteryStatusCheckResultRequest', session);
 
-export const hvacOn = (session: ICarwingsSession) => longPolledRequest('ACRemoteRequest', 'ACRemoteResult', session);
-export const hvacOff = (session: ICarwingsSession) => longPolledRequest('ACRemoteOffRequest', 'ACRemoteOffResult', session);
+export const hvacOn = (session: ICarwingsSession) => session('ACRemoteRequest');
+export const hvacOff = (session: ICarwingsSession) => session('ACRemoteOffRequest');
 export const hvacStatus = (session: ICarwingsSession) => session('RemoteACRecordsRequest');
 
 //experimental, for homebridge-carwings.
