@@ -200,7 +200,11 @@ exports.loginSession = acompose(function (sessionRequest) { return function (act
         case 0: return [4 /*yield*/, api(action, __assign({}, sessionRequest))];
         case 1: return [2 /*return*/, _a.sent()];
     }
-}); }); }; }, function (resultResponse) { return ({ custom_sessionid: getsessionid(resultResponse), VIN: getvin(resultResponse), RegionCode: getregioncode(resultResponse) }); }, //transforms auth response.
+}); }); }; }, function (resultResponse) { return ({
+    custom_sessionid: getsessionid(resultResponse),
+    VIN: getvin(resultResponse),
+    RegionCode: getregioncode(resultResponse)
+}); }, //transforms auth response.
 performAuthentication);
 /**
  * Returns a result after waiting for 5000ms and a callback.

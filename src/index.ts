@@ -7,14 +7,19 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 axios.defaults.baseURL = 'https://gdcportalgw.its-mo.com';
 
 process.on('unhandledRejection', r => console.log(r));
-export interface ICarwingsSession extends Function{
-}
 const initial_app_strings:string = 'geORNtsZe5I4lRGjG9GZiA';
 const defaultRegionCode:string = 'NNA';
 const language:string = 'en-US';
 const tz = 'America/Denver';
 
 const tlog = t => _.thru(d => { console.log(t, d); return d; });
+
+export interface ICarwingsSession extends Function{
+}
+export interface ICarwingsCheckStatus {
+  status: number;
+}
+
 
 /**
  * Sleeps.
@@ -65,7 +70,7 @@ const blowPassword = _.curry((key:string, plainpass:string): string => {
  * @param profile
  * @returns {string}
  */
-function getsessionid(profile) {
+function getsessionid(profile):string {
   if (profile && profile.vehicleInfo[0]) {
     return profile.vehicleInfo[0].custom_sessionid;
   }
@@ -77,7 +82,7 @@ function getsessionid(profile) {
   }
 }
 
-function getvin(profile) {
+function getvin(profile):string {
   if (profile && profile.vehicleInfo[0]) {
     return profile.vehicleInfo[0].vin;
   }
@@ -132,7 +137,10 @@ const performAuthentication = acompose(performUserLogin, generateCredentials);
  */
 export const loginSession: ICarwingsSession = acompose(
   sessionRequest => async (action) => await api(action, { ...sessionRequest }),
-  resultResponse => ({ custom_sessionid: getsessionid(resultResponse), VIN: getvin(resultResponse), RegionCode: getregioncode(resultResponse) }), //transforms auth response.
+  resultResponse => ({
+    custom_sessionid: getsessionid(resultResponse),
+    VIN: getvin(resultResponse),
+    RegionCode: getregioncode(resultResponse) }), //transforms auth response.
   performAuthentication, //performs authentication
 );
 
