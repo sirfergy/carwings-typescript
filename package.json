@@ -1,6 +1,6 @@
 {
   "author": {
-    "name": "Bhagya Silva"
+    "name": "Bhagya Silva, Peter Löfgren"
   },
   "dependencies": {
     "@types/lodash": "^4.14.78",
@@ -48,5 +48,5 @@
     "build": "webpack --colors --progress --bail",
     "test": "jasmine-ts \"./test/**/*.spec.ts\""
   },
-  "version": "0.1.0"
+  "version": "0.9.0"
 }

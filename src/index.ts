@@ -16,6 +16,29 @@ const tlog = t => _.thru(d => { console.log(t, d); return d; });
 
 export interface ICarwingsSession extends Function{
 }
+
+export class CarwingsAuthenticator {
+  username: string;
+  password: string;
+  regionCode: string;
+
+  constructor(username, password, regionCode) {
+    var base64regex = /^(?:[A-Z0-9+\/]{4})*(?:[A-Z0-9+\/]{2}==|[A-Z0-9+\/]{3}=|[A-Z0-9+\/]{4})$/i;
+    this.username = username;
+    this.password = password;
+    this.regionCode = regionCode;
+    if(base64regex.test(this.password)){
+      this.password = Buffer.from(password, 'base64').toString();
+    }
+  }
+
+  async login(): Promise<ICarwingsSession>{
+    let session = await loginSession(this.username, this.password, this.regionCode);
+    return session;
+  }
+
+}
+
 export interface ICarwingsCheckStatus {
   status: number;
 }
@@ -40,13 +63,14 @@ export async function api(action:string, data: any) {
   let response = await axios.post(`/gworchest_160803A/gdc/${action}.php`, querystring.stringify(data));
 
   if(response.data.status === 200) {
+    //console.log(`🍃 api ${action} 👍`, data);
     console.log(`🍃 api ${action} 👍`);
     return response.data;
   } else {
 
-    if(response.data.status === 401) {
+    if(response.data && response.data.status === 401) {
       // Send back 401 response so it can be handled.
-      console.log('Carwings Status 401');
+      // console.log('Carwings Status 401');
       return response.data;
     } else {
       console.log(`api ${action} 👎\r\n`, response);
@@ -71,12 +95,12 @@ const blowPassword = _.curry((key:string, plainpass:string): string => {
  * @returns {string}
  */
 function getsessionid(profile):string {
+  //console.log("LOGIN", profile);
   if (profile && profile.vehicleInfo[0]) {
     return profile.vehicleInfo[0].custom_sessionid;
   }
   else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
     return profile.VehicleInfoList.vehicleInfo[0].custom_sessionid;
-
   } else {
     return null;
   }
@@ -88,7 +112,6 @@ function getvin(profile):string {
   }
   else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
     return profile.VehicleInfoList.vehicleInfo[0].vin;
-
   } else {
     return null;
   }
@@ -98,8 +121,9 @@ function getregioncode(profile): string {
 	return profile.CustomerInfo.RegionCode;
 }
 
-const acompose = (fn?, ...rest) : Function => {
+const acompose = (fn?: Function, ...rest) : Function => {
   if (rest.length) {
+    console.log('acompose ', rest);
     return async (...args) => fn(await acompose(...rest)(...args));
   } else { //if there are no arguments.
     return fn;
@@ -149,10 +173,13 @@ export const loginSession: ICarwingsSession = acompose(
  */
 const polledResult = _.curry(async (session: ICarwingsSession, action: string, resultKey: string) => {
   let result;
+  console.info("ResultKey 🔑", resultKey);
+  console.info("action ", action);
   do {
     //sleep and make a request.
     await sleep(5000);
     result = await session(action, { resultKey });
+    console.log('POLLED result', result);
   } while(result.responseFlag !== '1');
 
   return result;
@@ -161,13 +188,24 @@ const polledResult = _.curry(async (session: ICarwingsSession, action: string, r
 /**
  * Makes a request for the action, and then keeps polling for the polledAction to complete.
  */
-const longPolledRequest = _.curry((action:string, polledAction:string, session:ICarwingsSession) => {
-  return acompose(
-    polledResult(session, polledAction),
+const longPolledRequest = _.curry(async (action:string, polledAction:string, session:ICarwingsSession) => {
+  console.info("⏰  making a long polled request..." + action + ' ' + polledAction);
+  let result = await acompose(
+     polledResult(session, polledAction),
     actionResponseResult => actionResponseResult.resultKey,
     () => session(action),
   )();
+  return result;
 });
+
+// const longPolledRequest = _.curry(async (action:string, polledAction:string, session:ICarwingsSession) => {
+//   console.info("⏰  making a long polled request..." + action + ' ' + polledAction);
+//   return acompose(
+//     await polledResult(session, polledAction),
+//     actionResponseResult => actionResponseResult.resultKey,
+//     () => session(action),
+//   );
+// });
 
 export const batteryRecords = (session: ICarwingsSession) => session('BatteryStatusRecordsRequest');
 export const batteryStatusCheckRequest = (session: ICarwingsSession) => session('BatteryStatusCheckRequest');

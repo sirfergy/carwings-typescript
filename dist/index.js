@@ -1164,6 +1164,32 @@ var defaultRegionCode = 'NNA';
 var language = 'en-US';
 var tz = 'America/Denver';
 var tlog = function (t) { return _.thru(function (d) { console.log(t, d); return d; }); };
+var CarwingsAuthenticator = /** @class */ (function () {
+    function CarwingsAuthenticator(username, password, regionCode) {
+        var base64regex = /^(?:[A-Z0-9+\/]{4})*(?:[A-Z0-9+\/]{2}==|[A-Z0-9+\/]{3}=|[A-Z0-9+\/]{4})$/i;
+        this.username = username;
+        this.password = password;
+        this.regionCode = regionCode;
+        if (base64regex.test(this.password)) {
+            this.password = Buffer.from(password, 'base64').toString();
+        }
+    }
+    CarwingsAuthenticator.prototype.login = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var session;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, exports.loginSession(this.username, this.password, this.regionCode)];
+                    case 1:
+                        session = _a.sent();
+                        return [2 /*return*/, session];
+                }
+            });
+        });
+    };
+    return CarwingsAuthenticator;
+}());
+exports.CarwingsAuthenticator = CarwingsAuthenticator;
 /**
  * Sleeps.
  * @param {number} ms
@@ -1188,13 +1214,14 @@ function api(action, data) {
                 case 1:
                     response = _a.sent();
                     if (response.data.status === 200) {
+                        //console.log(`🍃 api ${action} 👍`, data);
                         console.log("\uD83C\uDF43 api " + action + " \uD83D\uDC4D");
                         return [2 /*return*/, response.data];
                     }
                     else {
-                        if (response.data.status === 401) {
+                        if (response.data && response.data.status === 401) {
                             // Send back 401 response so it can be handled.
-                            console.log('Carwings Status 401');
+                            // console.log('Carwings Status 401');
                             return [2 /*return*/, response.data];
                         }
                         else {
@@ -1220,6 +1247,7 @@ var blowPassword = _.curry(function (key, plainpass) {
  * @returns {string}
  */
 function getsessionid(profile) {
+    //console.log("LOGIN", profile);
     if (profile && profile.vehicleInfo[0]) {
         return profile.vehicleInfo[0].custom_sessionid;
     }
@@ -1250,6 +1278,7 @@ var acompose = function (fn) {
         rest[_i - 1] = arguments[_i];
     }
     if (rest.length) {
+        console.log('acompose ', rest);
         return function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
@@ -1321,29 +1350,52 @@ var polledResult = _.curry(function (session, action, resultKey) { return __awai
     var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: 
+            case 0:
+                console.info("ResultKey 🔑", resultKey);
+                console.info("action ", action);
+                _a.label = 1;
+            case 1: 
             //sleep and make a request.
             return [4 /*yield*/, sleep(5000)];
-            case 1:
+            case 2:
                 //sleep and make a request.
                 _a.sent();
                 return [4 /*yield*/, session(action, { resultKey: resultKey })];
-            case 2:
-                result = _a.sent();
-                _a.label = 3;
             case 3:
-                if (result.responseFlag !== '1') return [3 /*break*/, 0];
+                result = _a.sent();
+                console.log('POLLED result', result);
                 _a.label = 4;
-            case 4: return [2 /*return*/, result];
+            case 4:
+                if (result.responseFlag !== '1') return [3 /*break*/, 1];
+                _a.label = 5;
+            case 5: return [2 /*return*/, result];
         }
     });
 }); });
 /**
  * Makes a request for the action, and then keeps polling for the polledAction to complete.
  */
-var longPolledRequest = _.curry(function (action, polledAction, session) {
-    return acompose(polledResult(session, polledAction), function (actionResponseResult) { return actionResponseResult.resultKey; }, function () { return session(action); })();
-});
+var longPolledRequest = _.curry(function (action, polledAction, session) { return __awaiter(_this, void 0, void 0, function () {
+    var result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                console.info("⏰  making a long polled request..." + action + ' ' + polledAction);
+                return [4 /*yield*/, acompose(polledResult(session, polledAction), function (actionResponseResult) { return actionResponseResult.resultKey; }, function () { return session(action); })()];
+            case 1:
+                result = _a.sent();
+                return [2 /*return*/, result];
+        }
+    });
+}); });
+// const longPolledRequest = _.curry(async (action:string, polledAction:string, session:ICarwingsSession) => {
+//   console.info("⏰  making a long polled request..." + action + ' ' + polledAction);
+//   return acompose(
+//     await polledResult(session, polledAction),
+//     actionResponseResult => actionResponseResult.resultKey,
+//     () => session(action),
+//   );
+// });
 exports.batteryRecords = function (session) { return session('BatteryStatusRecordsRequest'); };
 exports.batteryStatusCheckRequest = function (session) { return session('BatteryStatusCheckRequest'); };
 exports.batteryStatusCheck = function (session) { return longPolledRequest('BatteryStatusCheckRequest', 'BatteryStatusCheckResultRequest', session); };
@@ -3979,7 +4031,7 @@ module.exports = require("zlib");
 /* 43 */
 /***/ (function(module, exports) {
 
-module.exports = {"_args":[[{"raw":"axios@^0.15.3","scope":null,"escapedName":"axios","name":"axios","rawSpec":"^0.15.3","spec":">=0.15.3 <0.16.0","type":"range"},"/Users/bhagyasilva/temp/carwings"]],"_from":"axios@>=0.15.3 <0.16.0","_id":"axios@0.15.3","_inCache":true,"_location":"/axios","_nodeVersion":"7.0.0","_npmOperationalInternal":{"host":"packages-18-east.internal.npmjs.com","tmp":"tmp/axios-0.15.3.tgz_1480283949051_0.7373273745179176"},"_npmUser":{"name":"nickuraltsev","email":"nick.uraltsev@gmail.com"},"_npmVersion":"3.10.8","_phantomChildren":{},"_requested":{"raw":"axios@^0.15.3","scope":null,"escapedName":"axios","name":"axios","rawSpec":"^0.15.3","spec":">=0.15.3 <0.16.0","type":"range"},"_requiredBy":["#USER","/"],"_resolved":"https://registry.npmjs.org/axios/-/axios-0.15.3.tgz","_shasum":"2c9d638b2e191a08ea1d6cc988eadd6ba5bdc053","_shrinkwrap":null,"_spec":"axios@^0.15.3","_where":"/Users/bhagyasilva/temp/carwings","author":{"name":"Matt Zabriskie"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"bugs":{"url":"https://github.com/mzabriskie/axios/issues"},"dependencies":{"follow-redirects":"1.0.0"},"description":"Promise based HTTP client for the browser and node.js","devDependencies":{"coveralls":"^2.11.9","es6-promise":"^4.0.5","grunt":"^1.0.1","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.0.0","grunt-contrib-nodeunit":"^1.0.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^19.0.0","grunt-karma":"^2.0.0","grunt-ts":"^6.0.0-beta.3","grunt-typings":"^0.1.5","grunt-webpack":"^1.0.18","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^1.3.0","karma-chrome-launcher":"^2.0.0","karma-coverage":"^1.0.0","karma-firefox-launcher":"^1.0.0","karma-jasmine":"^1.0.2","karma-jasmine-ajax":"^0.1.13","karma-opera-launcher":"^1.0.0","karma-phantomjs-launcher":"^1.0.0","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^1.1.0","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.7","karma-webpack":"^1.7.0","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","phantomjs-prebuilt":"^2.1.7","sinon":"^1.17.4","typescript":"^2.0.3","url-search-params":"^0.6.1","webpack":"^1.13.1","webpack-dev-server":"^1.14.1"},"directories":{},"dist":{"shasum":"2c9d638b2e191a08ea1d6cc988eadd6ba5bdc053","tarball":"https://registry.npmjs.org/axios/-/axios-0.15.3.tgz"},"gitHead":"4976816808c4e81acad2393c429832afeaf9664d","homepage":"https://github.com/mzabriskie/axios","keywords":["xhr","http","ajax","promise","node"],"license":"MIT","main":"index.js","maintainers":[{"name":"mzabriskie","email":"mzabriskie@gmail.com"},{"name":"nickuraltsev","email":"nick.uraltsev@gmail.com"}],"name":"axios","optionalDependencies":{},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/mzabriskie/axios.git"},"scripts":{"build":"NODE_ENV=production grunt build","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","examples":"node ./examples/server.js","postversion":"git push && git push --tags","preversion":"npm test","start":"node ./sandbox/server.js","test":"grunt test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json"},"typings":"./index.d.ts","version":"0.15.3"}
+module.exports = {"_from":"axios@^0.15.3","_id":"axios@0.15.3","_inBundle":false,"_integrity":"sha1-LJ1jiy4ZGgjqHWzJiOrda6W9wFM=","_location":"/axios","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"axios@^0.15.3","name":"axios","escapedName":"axios","rawSpec":"^0.15.3","saveSpec":null,"fetchSpec":"^0.15.3"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/axios/-/axios-0.15.3.tgz","_shasum":"2c9d638b2e191a08ea1d6cc988eadd6ba5bdc053","_spec":"axios@^0.15.3","_where":"/Users/peter/Code/homebridge/carwings-typescript","author":{"name":"Matt Zabriskie"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"bugs":{"url":"https://github.com/mzabriskie/axios/issues"},"bundleDependencies":false,"dependencies":{"follow-redirects":"1.0.0"},"deprecated":false,"description":"Promise based HTTP client for the browser and node.js","devDependencies":{"coveralls":"^2.11.9","es6-promise":"^4.0.5","grunt":"^1.0.1","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.0.0","grunt-contrib-nodeunit":"^1.0.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^19.0.0","grunt-karma":"^2.0.0","grunt-ts":"^6.0.0-beta.3","grunt-typings":"^0.1.5","grunt-webpack":"^1.0.18","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^1.3.0","karma-chrome-launcher":"^2.0.0","karma-coverage":"^1.0.0","karma-firefox-launcher":"^1.0.0","karma-jasmine":"^1.0.2","karma-jasmine-ajax":"^0.1.13","karma-opera-launcher":"^1.0.0","karma-phantomjs-launcher":"^1.0.0","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^1.1.0","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.7","karma-webpack":"^1.7.0","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","phantomjs-prebuilt":"^2.1.7","sinon":"^1.17.4","typescript":"^2.0.3","url-search-params":"^0.6.1","webpack":"^1.13.1","webpack-dev-server":"^1.14.1"},"homepage":"https://github.com/mzabriskie/axios","keywords":["xhr","http","ajax","promise","node"],"license":"MIT","main":"index.js","name":"axios","repository":{"type":"git","url":"git+https://github.com/mzabriskie/axios.git"},"scripts":{"build":"NODE_ENV=production grunt build","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","examples":"node ./examples/server.js","postversion":"git push && git push --tags","preversion":"npm test","start":"node ./sandbox/server.js","test":"grunt test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json"},"typings":"./index.d.ts","version":"0.15.3"}
 
 /***/ }),
 /* 44 */
