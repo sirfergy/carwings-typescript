@@ -48,5 +48,5 @@
     "build": "webpack --colors --progress --bail",
     "test": "jasmine-ts \"./test/**/*.spec.ts\""
   },
-  "version": "0.9.0"
+  "version": "0.9.1"
 }

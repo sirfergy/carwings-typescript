@@ -1187,6 +1187,28 @@ var CarwingsAuthenticator = /** @class */ (function () {
             });
         });
     };
+    CarwingsAuthenticator.prototype.validateSession = function (session, authenticated) {
+        if (authenticated === void 0) { authenticated = true; }
+        return __awaiter(this, void 0, void 0, function () {
+            var validatedSession;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        validatedSession = session;
+                        //console.log('checkIfAuthenticated');
+                        if (typeof validatedSession !== "function") {
+                            authenticated = false;
+                        }
+                        if (!!authenticated) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.login()];
+                    case 1:
+                        validatedSession = _a.sent();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, validatedSession];
+                }
+            });
+        });
+    };
     return CarwingsAuthenticator;
 }());
 exports.CarwingsAuthenticator = CarwingsAuthenticator;
@@ -1215,7 +1237,7 @@ function api(action, data) {
                     response = _a.sent();
                     if (response.data.status === 200) {
                         //console.log(`🍃 api ${action} 👍`, data);
-                        console.log("\uD83C\uDF43 api " + action + " \uD83D\uDC4D");
+                        //console.log(`🍃 api ${action} 👍`);
                         return [2 /*return*/, response.data];
                     }
                     else {
@@ -1225,7 +1247,7 @@ function api(action, data) {
                             return [2 /*return*/, response.data];
                         }
                         else {
-                            console.log("api " + action + " \uD83D\uDC4E\r\n", response);
+                            //console.log(`api ${action} 👎\r\n`, response);
                             throw new Error(response.data.ErrorMessage);
                         }
                     }
@@ -1278,7 +1300,6 @@ var acompose = function (fn) {
         rest[_i - 1] = arguments[_i];
     }
     if (rest.length) {
-        console.log('acompose ', rest);
         return function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
@@ -1350,25 +1371,20 @@ var polledResult = _.curry(function (session, action, resultKey) { return __awai
     var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                console.info("ResultKey 🔑", resultKey);
-                console.info("action ", action);
-                _a.label = 1;
-            case 1: 
+            case 0: 
             //sleep and make a request.
             return [4 /*yield*/, sleep(5000)];
-            case 2:
+            case 1:
                 //sleep and make a request.
                 _a.sent();
                 return [4 /*yield*/, session(action, { resultKey: resultKey })];
-            case 3:
+            case 2:
                 result = _a.sent();
-                console.log('POLLED result', result);
+                _a.label = 3;
+            case 3:
+                if (result.responseFlag !== '1') return [3 /*break*/, 0];
                 _a.label = 4;
-            case 4:
-                if (result.responseFlag !== '1') return [3 /*break*/, 1];
-                _a.label = 5;
-            case 5: return [2 /*return*/, result];
+            case 4: return [2 /*return*/, result];
         }
     });
 }); });
@@ -1379,9 +1395,7 @@ var longPolledRequest = _.curry(function (action, polledAction, session) { retur
     var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                console.info("⏰  making a long polled request..." + action + ' ' + polledAction);
-                return [4 /*yield*/, acompose(polledResult(session, polledAction), function (actionResponseResult) { return actionResponseResult.resultKey; }, function () { return session(action); })()];
+            case 0: return [4 /*yield*/, acompose(polledResult(session, polledAction), function (actionResponseResult) { return actionResponseResult.resultKey; }, function () { return session(action); })()];
             case 1:
                 result = _a.sent();
                 return [2 /*return*/, result];
@@ -1399,11 +1413,10 @@ var longPolledRequest = _.curry(function (action, polledAction, session) { retur
 exports.batteryRecords = function (session) { return session('BatteryStatusRecordsRequest'); };
 exports.batteryStatusCheckRequest = function (session) { return session('BatteryStatusCheckRequest'); };
 exports.batteryStatusCheck = function (session) { return longPolledRequest('BatteryStatusCheckRequest', 'BatteryStatusCheckResultRequest', session); };
+exports.batteryChargingRequest = function (session) { return session('BatteryRemoteChargingRequest'); };
 exports.hvacOn = function (session) { return session('ACRemoteRequest'); };
 exports.hvacOff = function (session) { return session('ACRemoteOffRequest'); };
 exports.hvacStatus = function (session) { return session('RemoteACRecordsRequest'); };
-//experimental, for homebridge-carwings.
-exports.authenticateAndBatteryStatusCheckRequest = function (session) { return longPolledRequest('UserLoginRequest', 'BatteryStatusCheckRequest', session); };
 
 
 /***/ }),

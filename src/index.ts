@@ -37,6 +37,18 @@ export class CarwingsAuthenticator {
     return session;
   }
 
+  async validateSession(session: ICarwingsSession, authenticated = true): Promise<ICarwingsSession>{
+    let validatedSession = session;
+    //console.log('checkIfAuthenticated');
+    if (typeof validatedSession !== "function") {
+      authenticated = false;
+    }
+    if(!authenticated) {
+      validatedSession = await this.login();
+    }
+    return validatedSession;
+  }
+
 }
 
 export interface ICarwingsCheckStatus {
@@ -64,7 +76,7 @@ export async function api(action:string, data: any) {
 
   if(response.data.status === 200) {
     //console.log(`🍃 api ${action} 👍`, data);
-    console.log(`🍃 api ${action} 👍`);
+    //console.log(`🍃 api ${action} 👍`);
     return response.data;
   } else {
 
@@ -73,7 +85,7 @@ export async function api(action:string, data: any) {
       // console.log('Carwings Status 401');
       return response.data;
     } else {
-      console.log(`api ${action} 👎\r\n`, response);
+      //console.log(`api ${action} 👎\r\n`, response);
       throw new Error(response.data.ErrorMessage);
     }
 
@@ -123,7 +135,6 @@ function getregioncode(profile): string {
 
 const acompose = (fn?: Function, ...rest) : Function => {
   if (rest.length) {
-    console.log('acompose ', rest);
     return async (...args) => fn(await acompose(...rest)(...args));
   } else { //if there are no arguments.
     return fn;
@@ -173,13 +184,13 @@ export const loginSession: ICarwingsSession = acompose(
  */
 const polledResult = _.curry(async (session: ICarwingsSession, action: string, resultKey: string) => {
   let result;
-  console.info("ResultKey 🔑", resultKey);
-  console.info("action ", action);
+  //console.info("ResultKey 🔑", resultKey);
+  //console.info("action ", action);
   do {
     //sleep and make a request.
     await sleep(5000);
     result = await session(action, { resultKey });
-    console.log('POLLED result', result);
+    //console.log('POLLED result', result);
   } while(result.responseFlag !== '1');
 
   return result;
@@ -189,7 +200,7 @@ const polledResult = _.curry(async (session: ICarwingsSession, action: string, r
  * Makes a request for the action, and then keeps polling for the polledAction to complete.
  */
 const longPolledRequest = _.curry(async (action:string, polledAction:string, session:ICarwingsSession) => {
-  console.info("⏰  making a long polled request..." + action + ' ' + polledAction);
+  //console.info("⏰  making a long polled request..." + action + ' ' + polledAction);
   let result = await acompose(
      polledResult(session, polledAction),
     actionResponseResult => actionResponseResult.resultKey,
@@ -210,10 +221,8 @@ const longPolledRequest = _.curry(async (action:string, polledAction:string, ses
 export const batteryRecords = (session: ICarwingsSession) => session('BatteryStatusRecordsRequest');
 export const batteryStatusCheckRequest = (session: ICarwingsSession) => session('BatteryStatusCheckRequest');
 export const batteryStatusCheck = (session: ICarwingsSession) => longPolledRequest('BatteryStatusCheckRequest', 'BatteryStatusCheckResultRequest', session);
+export const batteryChargingRequest = (session: ICarwingsSession) => session('BatteryRemoteChargingRequest');
 
 export const hvacOn = (session: ICarwingsSession) => session('ACRemoteRequest');
 export const hvacOff = (session: ICarwingsSession) => session('ACRemoteOffRequest');
 export const hvacStatus = (session: ICarwingsSession) => session('RemoteACRecordsRequest');
-
-//experimental, for homebridge-carwings.
-export const authenticateAndBatteryStatusCheckRequest = (session: ICarwingsSession) => longPolledRequest('UserLoginRequest','BatteryStatusCheckRequest', session);
