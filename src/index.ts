@@ -27,9 +27,13 @@ export class CarwingsAuthenticator {
     this.username = username;
     this.password = password;
     this.regionCode = regionCode;
-    if(base64regex.test(this.password)){
-      this.password = Buffer.from(password, 'base64').toString();
-    }
+
+    // This test fails if password is not simple words. Skip for now
+    // if(base64regex.test(this.password)){
+    //   var buff = Buffer.from(password);
+    //   this.password = buff.toString('base64');
+    // }
+
   }
 
   async login(): Promise<ICarwingsSession>{
@@ -72,17 +76,17 @@ function sleep(ms: number = 0) {
  * @returns {Promise<void>}
  */
 export async function api(action:string, data: any) {
-  let response = await axios.post(`/gworchest_160803A/gdc/${action}.php`, querystring.stringify(data));
+  let response = await axios.post(`/gworchest_0405EC/gdc/${action}.php`, querystring.stringify(data));
 
   if(response.data.status === 200) {
-    //console.log(`🍃 api ${action} 👍`, data);
-    //console.log(`🍃 api ${action} 👍`);
+    //console.log(`🍃 api DATA ${action} 👍`, data);
+    //console.log(`🍃 api ${action} 👍`, response.data);
     return response.data;
   } else {
 
     if(response.data && response.data.status === 401) {
       // Send back 401 response so it can be handled.
-      // console.log('Carwings Status 401');
+      //console.log('Carwings Status 401');
       return response.data;
     } else {
       //console.log(`api ${action} 👎\r\n`, response);

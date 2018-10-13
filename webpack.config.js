@@ -1,3 +1,5 @@
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+
 module.exports = {
     entry: "./src/index.ts",
     output: {
@@ -14,7 +16,9 @@ module.exports = {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js", ".json"]
     },
-
+    plugins: [
+        new CleanWebpackPlugin(['dist']),
+    ],
     module: {
       loaders: [
         { test: /.ts$/, loader: 'awesome-typescript-loader' }
