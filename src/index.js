@@ -22,8 +22,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -62,9 +62,11 @@ var CarwingsAuthenticator = /** @class */ (function () {
         this.username = username;
         this.password = password;
         this.regionCode = regionCode;
-        if (base64regex.test(this.password)) {
-            this.password = Buffer.from(password, 'base64').toString();
-        }
+        // This test fails if password is not simple words. Skip for now
+        // if(base64regex.test(this.password)){
+        //   var buff = Buffer.from(password);
+        //   this.password = buff.toString('base64');
+        // }
     }
     CarwingsAuthenticator.prototype.login = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -124,18 +126,18 @@ function api(action, data) {
         var response;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, axios_1.default.post("/gworchest_160803A/gdc/" + action + ".php", querystring.stringify(data))];
+                case 0: return [4 /*yield*/, axios_1.default.post("/gworchest_160803EC/gdc/" + action + ".php", querystring.stringify(data))];
                 case 1:
                     response = _a.sent();
                     if (response.data.status === 200) {
-                        //console.log(`🍃 api ${action} 👍`, data);
-                        //console.log(`🍃 api ${action} 👍`);
+                        //console.log(`🍃 api DATA ${action} 👍`, data);
+                        //console.log(`🍃 api ${action} 👍`, response.data);
                         return [2 /*return*/, response.data];
                     }
                     else {
                         if (response.data && response.data.status === 401) {
                             // Send back 401 response so it can be handled.
-                            // console.log('Carwings Status 401');
+                            //console.log('Carwings Status 401');
                             return [2 /*return*/, response.data];
                         }
                         else {
@@ -162,7 +164,7 @@ var blowPassword = _.curry(function (key, plainpass) {
  */
 function getsessionid(profile) {
     //console.log("LOGIN", profile);
-    if (profile && profile.vehicleInfo[0]) {
+    if (profile && profile.vehicleInfo && profile.vehicleInfo[0]) {
         return profile.vehicleInfo[0].custom_sessionid;
     }
     else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
@@ -173,7 +175,7 @@ function getsessionid(profile) {
     }
 }
 function getvin(profile) {
-    if (profile && profile.vehicleInfo[0]) {
+    if (profile && profile.vehicleInfo && profile.vehicleInfo[0]) {
         return profile.vehicleInfo[0].vin;
     }
     else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
@@ -207,7 +209,7 @@ var acompose = function (fn) {
             }); });
         };
     }
-    else {
+    else { //if there are no arguments.
         return fn;
     }
 };

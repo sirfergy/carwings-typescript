@@ -76,7 +76,7 @@ function sleep(ms: number = 0) {
  * @returns {Promise<void>}
  */
 export async function api(action:string, data: any) {
-  let response = await axios.post(`/gworchest_0405EC/gdc/${action}.php`, querystring.stringify(data));
+  let response = await axios.post(`/gworchest_160803EC/gdc/${action}.php`, querystring.stringify(data));
 
   if(response.data.status === 200) {
     //console.log(`🍃 api DATA ${action} 👍`, data);
@@ -112,7 +112,7 @@ const blowPassword = _.curry((key:string, plainpass:string): string => {
  */
 function getsessionid(profile):string {
   //console.log("LOGIN", profile);
-  if (profile && profile.vehicleInfo[0]) {
+  if (profile && profile.vehicleInfo && profile.vehicleInfo[0]) {
     return profile.vehicleInfo[0].custom_sessionid;
   }
   else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
@@ -123,7 +123,7 @@ function getsessionid(profile):string {
 }
 
 function getvin(profile):string {
-  if (profile && profile.vehicleInfo[0]) {
+  if (profile && profile.vehicleInfo && profile.vehicleInfo[0]) {
     return profile.vehicleInfo[0].vin;
   }
   else if (profile && profile.VehicleInfoList && profile.VehicleInfoList.vehicleInfo[0]) {
